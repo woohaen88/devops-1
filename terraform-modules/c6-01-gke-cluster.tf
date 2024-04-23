@@ -19,9 +19,60 @@ resource "google_container_cluster" "primary" {
     channel = "RAPID"
   }
 
+  addons_config {
+    http_load_balancing {
+      disabled = false
+    }
+    horizontal_pod_autoscaling {
+      disabled = false
+    }
+    gce_persistent_disk_csi_driver_config {
+      enabled = true
+    }
+    gcs_fuse_csi_driver_config {
+      enabled = false
+    }
+  }
+
   datapath_provider = "ADVANCED_DATAPATH"
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block = "172.16.0.0/21"
+    stack_type = "IPV4"
+  }
+
+  binary_authorization {
+    evaluation_mode = "DISABLED"
+  }
+
+  default_max_pods_per_node = "110"
+  private_cluster_config {
+    enable_private_nodes = true
+    master_global_access_config {
+      enabled = true
+    }
+  }
+
+  database_encryption {
+    state = "DECRYPTED"
+  }
+
+  logging_config {
+    enable_components = [ "SYSTEM_COMPONENTS", "WORKLOADS" ]
+  }
+
+  monitoring_config {
+    enable_components = ["SYSTEM_COMPONENTS"]
+    managed_prometheus {
+      enabled = true
+    }
+  }
+
+  security_posture_config {
+    mode = "BASIC"
+    vulnerability_mode = "VULNERABILITY_DISABLED"
+  }  
 }
 
